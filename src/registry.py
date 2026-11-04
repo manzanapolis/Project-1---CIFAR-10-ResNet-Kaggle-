@@ -1,10 +1,11 @@
 """Results table of every finished run (L5 registry): results/runs.csv, one row per run directory.
 
-  python -m src.registry            pull new runs from Drive (rclone, metrics + preds only), then rebuild the table
-  python -m src.registry --no-pull  rebuild from the local mirror only
+  python -m src.registry            pull finished runs from Drive into runs/, then rebuild the table
+  python -m src.registry --no-pull  rebuild from runs/ only
 
-The local runs/ folder mirrors Drive cifar/runs/ (the single store for run outputs); weights and checkpoints
-stay on Drive unless needed. The table is small and committed to git, so results are versioned with the code.
+This machine's runs/ is the home of all run outputs (weights included). Drive cifar/runs/ is only Colab's
+working area and the transport back here; checkpoints of unfinished runs are not copied. The table is small
+and committed to git, so results are versioned with the code.
 """
 import csv
 import json
@@ -23,7 +24,7 @@ COLUMNS = ["hash", "arms", "fold", "params", "heldout_acc_flip", "heldout_acc_fl
 
 
 def pull():
-    cmd = [RCLONE, "copy", DRIVE_RUNS, str(RUNS_DIR), "--exclude", "ckpt.pt", "--exclude", "model.pt"]
+    cmd = [RCLONE, "copy", DRIVE_RUNS, str(RUNS_DIR), "--exclude", "ckpt.pt"]
     print(" ".join(cmd))
     subprocess.run(cmd, check=True)
 

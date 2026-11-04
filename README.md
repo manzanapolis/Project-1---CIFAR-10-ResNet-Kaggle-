@@ -25,12 +25,14 @@ Design decisions, with evidence and sources, are in `decisions.md`; the test-set
 
 ## Where things live
 
-| What | Single source of truth | Notes |
+This project folder (on the laptop) is the home base: every file of record lives here.
+
+| What | Home (source of truth) | Other copies |
 |---|---|---|
-| Code, configs, decisions, notebooks | this git repo (GitHub) | compute machines clone a pinned commit; no zip bundles |
-| Data cache `cache_uint8.npz` (162 MB, immutable) | Google Drive `cifar/data/` | checksum in `data/SHA256SUMS`; rebuildable with `src/extract.py` |
-| Run outputs `runs/<config-hash>/` | Google Drive `cifar/runs/` | local `runs/` is a mirror (metrics + preds only), refreshed by `src/registry.py` |
-| Results table | `results/runs.csv` (git) | regenerated from runs, committed with the code that produced it |
+| Code, configs, decisions, notebooks | this folder, versioned in git | GitHub = backup + what compute machines clone (pinned commit) |
+| Data cache `cache_uint8.npz` (162 MB, immutable) | `data/` here | Drive `cifar/data/` for Colab; checksum in `data/SHA256SUMS` |
+| Run outputs `runs/<config-hash>/` (weights, preds, metrics, logs) | `runs/` here | Drive `cifar/runs/` = Colab's working area; Burst `/scratch` = Burst's; both copied here by `src/registry.py` |
+| Results table | `results/runs.csv` (git) | regenerated from `runs/` |
 | Submissions | `submissions/*.csv` + `submissions.csv` (git) | every submission tied to a run hash |
 
 Every run directory is named by its config hash and its `metrics.json` records the git commit, GPU and host,
@@ -44,7 +46,7 @@ so any number traces back to exact code + config + hardware.
    (Burst alternative: `python -m src.launch <experiment>`, then `sbatch` the printed array plus a retry array with
    `--dependency=afterany:<id>`; the job copies its outputs to Drive.) Never train from uncommitted code.
 4. **Monitor.** Notebook output in Cursor (autosaved), or pull the latest `log.csv` with rclone.
-5. **Collect.** `python -m src.registry` (pulls new runs, rebuilds `results/runs.csv`); analysis scripts live in
+5. **Collect.** `python -m src.registry` (copies finished runs from Drive into `runs/` here, rebuilds `results/runs.csv`); analysis scripts live in
    `exploration/`. Commit the table.
 6. **Submit.** `python -m src.submit <run_hash> -m "what changed"` (validates, submits with the kaggle CLI, reads the
    public score back, logs it). Commit `submissions/`.
