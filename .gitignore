@@ -1,0 +1,11 @@
+# data: large or re-creatable; keep the small committed split/group files
+data/*
+!data/folds.npy
+!data/dup_groups.npy
+!data/dup_groups_loose.npy
+
+runs/
+submissions/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

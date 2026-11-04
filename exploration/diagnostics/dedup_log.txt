@@ -1,0 +1,47 @@
+coarse search: train -> train
+  search done (291s)
+coarse search: test -> train
+  search done (302s)
+coarse search: test -> test
+  search done (303s)
+
+=== train duplicates (coarse >= 0.95, edge >= 0.5, same label)
+  loose rule (edge >= 0.4) for splitting: groups 480, images in a group 1122 (2.24%), largest 54
+  pairs 759 -> groups 468, images in a group 1086 (2.17%), largest group 54
+  by transform: {'identity': 379, 'zoom': 246, 'corner': 56, 'identity+flip': 48, 'zoom+flip': 19, 'corner+flip': 11}
+  different-label candidates (coarse >= 0.95): 393, of which pass the edge check: 0 (max edge 0.47)
+=== test -> train: candidates (coarse >= 0.9) 410, flagged 18
+    test   44 ~  2537  coarse 0.925  edge 0.69  zoom29+flip
+    test  115 ~  5806  coarse 0.946  edge 0.68  zoom26+flip
+    test  351 ~   275  coarse 0.903  edge 0.54  zoom26+flip
+    test  369 ~ 45895  coarse 0.902  edge 0.51  identity
+    test  395 ~  9357  coarse 0.903  edge 0.50  zoom19
+    test  416 ~ 45076  coarse 0.939  edge 0.54  identity+flip
+    test  852 ~ 16616  coarse 0.913  edge 0.61  zoom29+flip
+    test  894 ~ 43421  coarse 0.969  edge 0.84  zoom26
+    test  961 ~ 40937  coarse 0.918  edge 0.65  zoom29+flip
+    test  978 ~ 10081  coarse 0.948  edge 0.74  corner40+flip
+    test 1091 ~  8372  coarse 0.911  edge 0.57  identity
+    test 1219 ~ 18033  coarse 0.933  edge 0.67  corner44+flip
+    test 1338 ~ 26938  coarse 0.941  edge 0.59  corner00
+    test 1338 ~ 49782  coarse 0.928  edge 0.56  corner40+flip
+    test 1338 ~ 48604  coarse 0.918  edge 0.52  identity+flip
+    test 1540 ~ 31533  coarse 0.908  edge 0.55  zoom29+flip
+    test 1708 ~ 12344  coarse 0.966  edge 0.80  zoom26+flip
+    test 1731 ~ 24753  coarse 0.991  edge 0.72  corner04+flip
+=== test -> test: candidates (coarse >= 0.9) 78, flagged 9
+    test  114 ~  1666  coarse 0.937  edge 0.71  identity
+    test  289 ~   534  coarse 0.993  edge 0.97  identity
+    test  306 ~   798  coarse 1.000  edge 1.00  identity
+    test  361 ~   751  coarse 0.984  edge 0.91  identity
+    test  599 ~   713  coarse 0.945  edge 0.84  identity
+    test  603 ~  1866  coarse 0.993  edge 0.97  identity
+    test 1185 ~  1762  coarse 0.947  edge 0.52  identity
+    test 1225 ~  1927  coarse 0.977  edge 0.91  identity
+    test 1924 ~  1987  coarse 0.984  edge 0.87  identity
+skipped dedup_groups.png (file is locked, probably open in a viewer)
+skipped dedup_test_train.png (file is locked, probably open in a viewer)
+skipped dedup_test_test.png (file is locked, probably open in a viewer)
+skipped dedup_borderline.png (file is locked, probably open in a viewer)
+
+done in 321s
