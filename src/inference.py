@@ -28,15 +28,15 @@ def view(x, dy, dx, flip, pad=2):
 
 
 @torch.no_grad()
-def predict_views(model, x_u8, device, batch=1000):
-    """Class probabilities for every image under every view: (N, len(VIEWS), 10) float16 numpy."""
+def predict_views(model, x_u8, device, batch=1000, views=None):
+    """Class probabilities for every image under every view: (N, len(views), 10) float16 numpy (default: all VIEWS)."""
     model.eval()
     device = torch.device(device)
     out = []
     for i in range(0, len(x_u8), batch):
         x = T.normalize(T.to_float(torch.from_numpy(x_u8[i:i + batch]).to(device)))
         with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
-            probs = [F.softmax(model(view(x, *v)).float(), 1) for v in VIEWS]
+            probs = [F.softmax(model(view(x, *VIEWS[v])).float(), 1) for v in (views or range(len(VIEWS)))]
         out.append(torch.stack(probs, 1).half().cpu())
     return torch.cat(out).numpy()
 

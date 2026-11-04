@@ -13,7 +13,7 @@ MEAN = (0.4914, 0.4822, 0.4465)
 STD = (0.2470, 0.2435, 0.2616)
 GRAY = (0.299, 0.587, 0.114)
 
-# T3B: train-set color PCA (exploration/data_diagnostics.py); columns are PC1..PC3, rows are R, G, B
+# Train-set color PCA (fancy PCA, rejected in T3A) (exploration/data_diagnostics.py); columns are PC1..PC3, rows are R, G, B
 EIGVAL = (0.1719, 0.0139, 0.0029)
 EIGVEC = ((-0.5580, 0.7063, -0.4356),
           (-0.5775, 0.0464, 0.8151),
@@ -23,10 +23,10 @@ EIGVEC = ((-0.5580, 0.7063, -0.4356),
 DATA = dict(
     flip=True,                # T1A
     aug_repeats=1,            # T1B: 2 = two independently augmented copies of each image per batch
-    photometric="jitter",     # T3: "none" | "jitter" (A) | "jitter+pca" (B) | "trivialaugment" (C)
+    photometric="jitter",     # T3: "none" | "jitter" (A) | "jitter+pca" (rejected) | "trivialaugment" (B)
     jitter=0.2,               # T3A: brightness/contrast factor range 1 +- jitter
-    pca_lighting=0.1,         # T3B: std of the per-image PCA lighting coefficients
-    strong_aug_off_last=0,    # T4B: epochs at the end with photometric augmentation switched off
+    pca_lighting=0.1,         # fancy PCA (rejected in T3A): std of the per-image PCA lighting coefficients
+    strong_aug_off_last=0,    # annealing (rejected in T4A): epochs at the end with photometric augmentation switched off
     crop_pad=4,               # T5: reflect-padded random crop
     occlusion="cutmix",       # T6: "cutmix" (A) | "cutout" (B) | "none"
     cutout=16,                # T6B: square side
@@ -34,4 +34,21 @@ DATA = dict(
     cutmix_alpha=1.0,         # T6A: lambda ~ Beta(alpha, alpha)
     grayscale_p=0.0,          # T7: 0 (A) | 0.1 (B)
     tta="flip",               # I2: "none" | "flip" (A) | "flip+shift" (B)
+)
+
+# Model defaults (M1A, M2A, M3B).
+MODEL = dict(widths=[56, 112, 232], blocks=[4, 4, 4], block="post", shortcut="conv")
+
+# R1: generic training recipe (kuangliu/pytorch-cifar main.py + bf16; last-epoch evaluation only).
+TRAIN = dict(
+    epochs=200,
+    batch=128,
+    lr=0.1,
+    momentum=0.9,
+    nesterov=False,
+    weight_decay=5e-4,
+    label_smoothing=0.0,
+    bf16=True,
+    workers=6,                # CPU workers, used only by TrivialAugment
+    monitor_every=10,         # held-out accuracy logged every N epochs (monitoring only, never selection)
 )

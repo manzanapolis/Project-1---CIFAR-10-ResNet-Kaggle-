@@ -3,9 +3,16 @@ data/*
 !data/folds.npy
 !data/dup_groups.npy
 !data/dup_groups_loose.npy
+!data/SHA256SUMS
 
 runs/
-submissions/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+*.zip
+jobs/
+logs/
+weights/
+
+# grids of Kaggle test images (sorting aid only; keep out of the repo)
+exploration/diagnostics/contested_*

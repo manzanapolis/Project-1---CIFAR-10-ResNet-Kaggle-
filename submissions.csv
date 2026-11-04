@@ -1,0 +1,3 @@
+date,file,file_sha1,run_hash,fold,oof_acc,public_score
+2026-11-04,sub01_M3E_TAcutmix_fold0_flipshift.csv,76225061dfb3,d2275ffc2325,0,0.9677,0.885
+2026-11-04,sub02_M3E_TAcutmix_rend25_fold0_flipshift.csv,09c66e5d2334,4107411a05e0,0,0.9665,0.877

@@ -45,7 +45,7 @@ def seed_everything(seed):
 
 
 class _TrivialAugmentSet(Dataset):
-    """Per-image TrivialAugment on the CPU (T3C); returns uint8 HWC like the cache."""
+    """Per-image TrivialAugment on the CPU (T3B); returns uint8 HWC like the cache."""
     def __init__(self, x):
         self.x, self.ta = x, TrivialAugmentWide()
 
@@ -80,7 +80,7 @@ class TrainStream:
 
     def epoch(self, e):
         cfg, r = self.cfg, self.cfg["aug_repeats"]
-        photometric_on = e < self.epochs - cfg["strong_aug_off_last"]           # T4B
+        photometric_on = e < self.epochs - cfg["strong_aug_off_last"]           # annealing, rejected in T4A (default 0)
         use_ta = cfg["photometric"] == "trivialaugment" and photometric_on
         batches = self._batches()
         if use_ta:
@@ -91,8 +91,10 @@ class TrainStream:
         else:
             raw = (self.x[b.repeat_interleave(r).to(self.device)] for b in batches)
         for b, x_u8 in zip(batches, raw):
-            y = self.y[b.repeat_interleave(r).to(self.device)]
-            x = T.augment(x_u8, cfg, self.aug_g, photometric_on=photometric_on)   # TA already applied on CPU
+            bi = b.repeat_interleave(r).to(self.device)
+            y = self.y[bi]
+            x_raw = self.x[bi] if use_ta and cfg.get("rendition_p") else None      # T7C starts from the raw image
+            x = T.augment(x_u8, cfg, self.aug_g, photometric_on=photometric_on, x_raw_u8=x_raw)   # TA already applied on CPU
             if cfg["occlusion"] == "cutmix" and self.aug_np.random() < cfg["cutmix_p"]:
                 yield T.cutmix(x, y, cfg["cutmix_alpha"], self.aug_np, self.aug_g)
             else:
