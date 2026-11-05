@@ -4,3 +4,4 @@ date,file,file_sha1,run_hash,fold,oof_acc,public_score
 2026-11-05,sub04_long_screen_M3E_R2_foldfinal_seed0_flipshift.csv,64e3508e2f1c,db5220449ec5,final,nan,0.90500
 2026-11-05,sub05_kfold_T1B_T1B_fold1_seed0_flipshift.csv,737d926b528a,6d8e6ddd6cf3,1,0.9747,0.88800
 2026-11-05,sub06_kfold_T1B_T1B_fold2_seed0_flipshift.csv,4db7830f7687,f99257a0f645,2,0.975,0.88600
+2026-11-05,sub07_long_screen_M3E_R2_foldfinal_seed0_flip.csv,3a119c948b40,db5220449ec5,final,nan,0.90800
