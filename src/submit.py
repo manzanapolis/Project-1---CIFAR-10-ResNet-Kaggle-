@@ -71,17 +71,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run_hash")
     ap.add_argument("-m", "--message", required=True)
+    ap.add_argument("--tta", default="flip+shift", choices=list(I.TTA))
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    path, m, labels = build(a.run_hash, dry_run=a.dry_run)
+    path, m, labels = build(a.run_hash, tta=a.tta, dry_run=a.dry_run)
     fold = json.loads((RUNS_DIR / a.run_hash / "config.json").read_text())["fold"]
-    print(f"{path.name}: counts {np.bincount(labels, minlength=10).tolist()}, held-out {m.get('heldout_acc_flip+shift')}")
+    print(f"{path.name}: counts {np.bincount(labels, minlength=10).tolist()}, held-out {m.get(f'heldout_acc_{a.tta}')}")
     if a.dry_run:
         return
     print(kaggle("competitions", "submit", "-c", COMPETITION, "-f", str(path), "-m", a.message))
     score = public_score(path.name)
     print("public score:", score or "not available yet")
-    I.log_submission(path, a.run_hash, fold, m.get("heldout_acc_flip+shift", ""), score)
+    I.log_submission(path, a.run_hash, fold, m.get(f"heldout_acc_{a.tta}", ""), score)
 
 
 if __name__ == "__main__":

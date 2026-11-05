@@ -2,3 +2,4 @@ date,file,file_sha1,run_hash,fold,oof_acc,public_score
 2026-11-04,sub01_M3E_TAcutmix_fold0_flipshift.csv,76225061dfb3,d2275ffc2325,0,0.9677,0.885
 2026-11-04,sub02_M3E_TAcutmix_rend25_fold0_flipshift.csv,09c66e5d2334,4107411a05e0,0,0.9665,0.877
 2026-11-05,sub04_long_screen_M3E_R2_foldfinal_seed0_flipshift.csv,64e3508e2f1c,db5220449ec5,final,nan,0.90500
+2026-11-05,sub05_kfold_T1B_T1B_fold1_seed0_flipshift.csv,737d926b528a,6d8e6ddd6cf3,1,0.9747,0.88800
