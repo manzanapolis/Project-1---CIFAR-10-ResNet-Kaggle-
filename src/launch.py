@@ -24,7 +24,7 @@ def expand(name):
     runs = []
     for arm, over in E.EXPERIMENTS[name].items():
         for fold in getattr(E, "EXPERIMENT_FOLDS", {}).get(name, E.FOLDS):
-            for seed in E.SEEDS:
+            for seed in getattr(E, "EXPERIMENT_SEEDS", {}).get(name, E.SEEDS):
                 cfg = default_config(fold=fold, seed=seed, **json.loads(json.dumps(over)))
                 runs.append((arm, cfg))
     return runs

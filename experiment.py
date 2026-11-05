@@ -7,8 +7,10 @@ Each experiment is a dict of arm name -> overrides of the defaults in src/config
   python -m src.launch arch_screen --local  run them here, one after another
 """
 FOLDS = [0, 1, 2, 3, 4]
-EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
+EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0],
+                    "kfold_T1B_L4": [1, 2, 3, 4], "long_screen_L4": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
 SEEDS = [0]
+EXPERIMENT_SEEDS = {"kfold_T1B_L4": [1], "long_screen_L4": [1]}   # per-experiment override
 
 # M3: candidate shapes, all ~4.74-4.93M parameters (decisions.md)
 SHAPES = {
@@ -88,5 +90,16 @@ EXPERIMENTS = {
                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
                "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
         for name, shape in [("M3E_R2", "M3E_high_res_heavy"), ("M3F_R2", "M3F_deep_two_stage")]
+    },
+
+    # L4 copies of the two overnight experiments (A100 nodes kept failing to boot on 11-05), seed 1 so they are
+    # separate runs; long recipe cut to 300 epochs so an L4 finishes inside the 12 h limit without resuming.
+    "kfold_T1B_L4": {"T1B": {"model": SHAPES["M3E_high_res_heavy"],
+                             "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2}}},
+    "long_screen_L4": {
+        name: {"model": SHAPES[shape],
+               "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+               "train": {"epochs": 300, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
+        for name, shape in [("M3E_R2_300", "M3E_high_res_heavy"), ("M3F_R2_300", "M3F_deep_two_stage")]
     },
 }
