@@ -10,7 +10,7 @@ back with `kaggle competitions submissions` and written into submissions.csv.
 import argparse
 import csv
 import json
-import shutil
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -21,7 +21,21 @@ from . import inference as I
 from .config import DATA_DIR, ROOT, RUNS_DIR
 
 COMPETITION = "cifar-10-res-net-architecture-challenge-dl"
-KAGGLE = shutil.which("kaggle") or str(Path.home() / "anaconda3" / "envs" / "d2l" / "Scripts" / "kaggle.exe")
+# kaggle CLI >= 2 (reads KGAT_ tokens) lives in the conda env "tools" (Python 3.12); see README one-time setup
+KAGGLE = str(Path.home() / "anaconda3" / "envs" / "tools" / "Scripts" / "kaggle.exe")
+
+
+def kaggle_env():
+    """Process env plus KAGGLE_API_TOKEN from the Windows user environment (setx) if this process predates it."""
+    env = dict(os.environ)
+    if not env.get("KAGGLE_API_TOKEN") and os.name == "nt":
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+            try:
+                env["KAGGLE_API_TOKEN"] = winreg.QueryValueEx(k, "KAGGLE_API_TOKEN")[0]
+            except FileNotFoundError:
+                pass
+    return env
 
 
 def build(run_hash, tta="flip+shift"):
@@ -38,7 +52,7 @@ def build(run_hash, tta="flip+shift"):
 
 
 def kaggle(*args):
-    return subprocess.run([KAGGLE, *args], capture_output=True, text=True, check=True).stdout
+    return subprocess.run([KAGGLE, *args], capture_output=True, text=True, check=True, env=kaggle_env()).stdout
 
 
 def public_score(file_name, tries=20):

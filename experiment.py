@@ -7,7 +7,7 @@ Each experiment is a dict of arm name -> overrides of the defaults in src/config
   python -m src.launch arch_screen --local  run them here, one after another
 """
 FOLDS = [0, 1, 2, 3, 4]
-EXPERIMENT_FOLDS = {"final_screen": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
+EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
 SEEDS = [0]
 
 # M3: candidate shapes, all ~4.74-4.93M parameters (decisions.md)
@@ -17,6 +17,7 @@ SHAPES = {
     "M3C_deep_front":     dict(widths=[48, 96, 216],       blocks=[8, 8, 4]),
     "M3D_four_layers":    dict(widths=[64, 128, 192, 368], blocks=[3, 3, 3, 1]),
     "M3E_high_res_heavy": dict(widths=[88, 128, 216],      blocks=[4, 4, 4]),
+    "M3F_deep_two_stage": dict(widths=[64, 128, 256],      blocks=[8, 8, 2]),   # teammate's 91.00 shape
 }
 
 EXPERIMENTS = {
@@ -73,5 +74,19 @@ EXPERIMENTS = {
         name: {"model": SHAPES["M3E_high_res_heavy"],
                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2, **extra}}
         for name, extra in [("T1B", {}), ("T1B_T7C", {"rendition_p": 0.25})]
+    },
+
+    # 5-fold CV of the best round-2 arm (fold 0 = round2/T1B_repeats2, same config hash).
+    "kfold_T1B": {
+        "T1B": {"model": SHAPES["M3E_high_res_heavy"],
+                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2}},
+    },
+
+    # R2 long recipe: T1B data + EMA + SAM + label smoothing, 600 epochs, on our M3E and on M3F (8/8/2).
+    "long_screen": {
+        name: {"model": SHAPES[shape],
+               "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+               "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
+        for name, shape in [("M3E_R2", "M3E_high_res_heavy"), ("M3F_R2", "M3F_deep_two_stage")]
     },
 }
