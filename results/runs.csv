@@ -4,3 +4,4 @@ hash,arms,fold,params,heldout_acc_flip,heldout_acc_flip+shift,shift_acc_flip,rob
 3d7b6a669362,round2/M2B_avgpool/fold0/seed0,0,4930530,0.9679,0.9689,0.9664,0.5132,0.2194,0.8793,0.614,0.9341,0.8025,0.9368,1295,,,
 4107411a05e0,round2/T7C_rendition0.25/fold0/seed0,0,4930530,0.9665,0.9663,0.9648,0.7114,0.4567,0.9132,0.8693,0.9448,0.9093,0.9347,2583,,,
 584e20f782b9,round2/T7B_gray0.1/fold0/seed0,0,4930530,0.9652,0.965,0.9646,0.5413,0.3789,0.8738,0.5977,0.945,0.8029,0.9328,1795,,,
+db5220449ec5,long_screen/M3E_R2/foldfinal/seed0,final,4930530,nan,nan,nan,,,,,,,,11575,NVIDIA A100-SXM4-40GB,a4e9c3ebc94c,False

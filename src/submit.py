@@ -12,6 +12,7 @@ import csv
 import json
 import os
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -38,14 +39,15 @@ def kaggle_env():
     return env
 
 
-def build(run_hash, tta="flip+shift"):
+def build(run_hash, tta="flip+shift", dry_run=False):
     d = RUNS_DIR / run_hash
     probs = np.load(d / "preds.npz")["test"]
     labels = I.tta(probs, tta).argmax(1)
     ids = np.load(DATA_DIR / "cache_uint8.npz")["id_test"]
     arms = (d / "arms.txt").read_text().split()[0].replace("/", "_") if (d / "arms.txt").exists() else run_hash
-    n = len(list((ROOT / "submissions").glob("sub*.csv"))) + 1
-    path = ROOT / "submissions" / f"sub{n:02d}_{arms}_{tta.replace('+', '')}.csv"
+    n = max([int(p.name[3:5]) for p in (ROOT / "submissions").glob("sub*.csv")], default=0) + 1
+    name = f"sub{n:02d}_{arms}_{tta.replace('+', '')}.csv"
+    path = Path(tempfile.gettempdir()) / name if dry_run else ROOT / "submissions" / name   # dry runs take no number
     I.write_submission(ids, labels, path)                     # validates against sample_submission.csv
     m = json.loads((d / "metrics.json").read_text())
     return path, m, labels
@@ -71,14 +73,14 @@ def main():
     ap.add_argument("-m", "--message", required=True)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    path, m, labels = build(a.run_hash)
+    path, m, labels = build(a.run_hash, dry_run=a.dry_run)
     fold = json.loads((RUNS_DIR / a.run_hash / "config.json").read_text())["fold"]
     print(f"{path.name}: counts {np.bincount(labels, minlength=10).tolist()}, held-out {m.get('heldout_acc_flip+shift')}")
-    score = ""
-    if not a.dry_run:
-        print(kaggle("competitions", "submit", "-c", COMPETITION, "-f", str(path), "-m", a.message))
-        score = public_score(path.name)
-        print("public score:", score or "not available yet")
+    if a.dry_run:
+        return
+    print(kaggle("competitions", "submit", "-c", COMPETITION, "-f", str(path), "-m", a.message))
+    score = public_score(path.name)
+    print("public score:", score or "not available yet")
     I.log_submission(path, a.run_hash, fold, m.get("heldout_acc_flip+shift", ""), score)
 
 
