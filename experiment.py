@@ -8,9 +8,10 @@ Each experiment is a dict of arm name -> overrides of the defaults in src/config
 """
 FOLDS = [0, 1, 2, 3, 4]
 EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0],
-                    "kfold_T1B_L4": [1, 2, 3, 4], "long_screen_L4": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
+                    "kfold_T1B_L4": [1, 2, 3, 4], "long_screen_L4": ["final", 0],
+                    "long_screen_s1": ["final"]}   # per-experiment override; "final" = all 50k (L2)
 SEEDS = [0]
-EXPERIMENT_SEEDS = {"kfold_T1B_L4": [1], "long_screen_L4": [1]}   # per-experiment override
+EXPERIMENT_SEEDS = {"kfold_T1B_L4": [1], "long_screen_L4": [1], "long_screen_s1": [1]}   # per-experiment override
 
 # M3: candidate shapes, all ~4.74-4.93M parameters (decisions.md)
 SHAPES = {
@@ -101,5 +102,13 @@ EXPERIMENTS = {
                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
                "train": {"epochs": 300, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
         for name, shape in [("M3E_R2_300", "M3E_high_res_heavy"), ("M3F_R2_300", "M3F_deep_two_stage")]
+    },
+
+    # Second seed of the 600-epoch long recipe on all 50k (a second final model; same configs as long_screen otherwise).
+    "long_screen_s1": {
+        name: {"model": SHAPES[shape],
+               "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+               "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
+        for name, shape in [("M3E_R2", "M3E_high_res_heavy"), ("M3F_R2", "M3F_deep_two_stage")]
     },
 }
