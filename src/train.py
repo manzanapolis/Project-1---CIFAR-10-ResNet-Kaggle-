@@ -100,8 +100,9 @@ def run(cfg, out):
     if (out / "ckpt.pt").exists():                                # resume after preemption / time limit
         ck = torch.load(out / "ckpt.pt", map_location=device, weights_only=False)   # our own file
         model.load_state_dict(ck["model"]); opt.load_state_dict(ck["opt"]); sched.load_state_dict(ck["sched"])
-        stream.order_g.set_state(ck["order_g"]); stream.aug_g.set_state(ck["aug_g"])
-        stream.aug_np.bit_generator.state = ck["aug_np"]; stream.ta_g.set_state(ck["ta_g"])
+        # generator states must be CPU ByteTensors even for CUDA generators (map_location moved them to the GPU)
+        stream.order_g.set_state(ck["order_g"].cpu()); stream.aug_g.set_state(ck["aug_g"].cpu())
+        stream.aug_np.bit_generator.state = ck["aug_np"]; stream.ta_g.set_state(ck["ta_g"].cpu())
         start, t_used = ck["epoch"], ck["time"]
         if ema is not None:
             ema.shadow.load_state_dict(ck["ema"])
