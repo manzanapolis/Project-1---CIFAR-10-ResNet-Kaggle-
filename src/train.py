@@ -25,7 +25,7 @@ from . import inference as I
 from . import load as L
 from . import transform as T
 from .config import DATA, MODEL, RUNS_DIR, TRAIN
-from .model import build, summary
+from .model import LIMIT, build, summary
 from .shiftsets import build as build_sets
 
 
@@ -88,7 +88,8 @@ def run(cfg, out):
                            seed, fold, device, workers=tc["workers"])
 
     model = build(cfg["model"]).to(device).to(memory_format=torch.channels_last)
-    n_params = summary(model, device) if not (out / "ckpt.pt").exists() else sum(p.numel() for p in model.parameters())
+    n_params = (summary(model, device, limit=None if cfg["model"].get("teacher") else LIMIT)
+                if not (out / "ckpt.pt").exists() else sum(p.numel() for p in model.parameters()))
     opt = torch.optim.SGD(model.parameters(), lr=tc["lr"], momentum=tc["momentum"],
                           nesterov=tc["nesterov"], weight_decay=tc["weight_decay"])
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=tc["epochs"] * stream.steps)

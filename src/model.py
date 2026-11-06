@@ -98,14 +98,15 @@ def count_params(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def summary(model, device="cpu"):
-    """Print the layer table the spec asks for (torchsummary if installed) and enforce the 5M limit."""
+def summary(model, device="cpu", limit=LIMIT):
+    """Print the layer table the spec asks for (torchsummary if installed) and enforce the 5M limit.
+    limit=None only for distillation teachers, which are never submitted."""
     n = count_params(model)
     try:
         from torchsummary import summary as ts
         ts(model, (3, 32, 32), device=str(device).split(":")[0])
     except ImportError:
         print(model)
-    print(f"trainable parameters: {n:,} (limit {LIMIT:,})")
-    assert n <= LIMIT, f"model has {n:,} parameters, over the {LIMIT:,} limit"
+    print(f"trainable parameters: {n:,} (limit {limit:,})" if limit else f"trainable parameters: {n:,} (teacher, no limit)")
+    assert limit is None or n <= limit, f"model has {n:,} parameters, over the {limit:,} limit"
     return n

@@ -9,7 +9,8 @@ Each experiment is a dict of arm name -> overrides of the defaults in src/config
 FOLDS = [0, 1, 2, 3, 4]
 EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0],
                     "kfold_T1B_L4": [1, 2, 3, 4], "long_screen_L4": ["final", 0],
-                    "long_screen_s1": ["final"]}   # per-experiment override; "final" = all 50k (L2)
+                    "long_screen_s1": ["final"],
+                    "teacher": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
 SEEDS = [0]
 EXPERIMENT_SEEDS = {"kfold_T1B_L4": [1], "long_screen_L4": [1], "long_screen_s1": [1]}   # per-experiment override
 
@@ -22,6 +23,8 @@ SHAPES = {
     "M3E_high_res_heavy": dict(widths=[88, 128, 216],      blocks=[4, 4, 4]),
     "M3F_deep_two_stage": dict(widths=[64, 128, 256],      blocks=[8, 8, 2]),   # teammate's 91.00 shape
 }
+# Distillation teacher only (never submitted): WRN-28-10-sized, 36.7M parameters, exempt from the 5M check.
+TEACHER = dict(widths=[160, 320, 640], blocks=[4, 4, 4], teacher=True)
 
 EXPERIMENTS = {
     # Network shape, with the data-layer defaults and the R1 recipe held fixed.
@@ -110,5 +113,13 @@ EXPERIMENTS = {
                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
                "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1}}
         for name, shape in [("M3E_R2", "M3E_high_res_heavy"), ("M3F_R2", "M3F_deep_two_stage")]
+    },
+
+    # Large teacher for knowledge distillation (allowed: trained from scratch on the permitted data). T1B data + EMA,
+    # 200 epochs; no SAM (cost) and no label smoothing (smoothed teachers distil worse, Mueller et al. 2019).
+    "teacher": {
+        "WRN28_10": {"model": TEACHER,
+                     "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+                     "train": {"epochs": 200, "ema": 0.999}},
     },
 }
