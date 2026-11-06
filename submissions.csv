@@ -7,3 +7,5 @@ date,file,file_sha1,run_hash,fold,oof_acc,public_score
 2026-11-05,sub07_long_screen_M3E_R2_foldfinal_seed0_flip.csv,3a119c948b40,db5220449ec5,final,nan,0.90800
 2026-11-05,sub08_long_screen_M3E_R2_foldfinal_seed0_none.csv,7a80261b2e38,db5220449ec5,final,nan,0.90400
 2026-11-06,sub09_long_screen_M3F_R2_foldfinal_seed0_flip.csv,7dad0cdb894c,1a453b9d969a,final,nan,0.90500
+2026-11-06,sub10_long_screen_s1_M3E_R2_foldfinal_seed1_flip.csv,675b90b2be14,6e63a995e2d6,final,nan,0.91300
+2026-11-06,sub11_long_screen_s1_M3F_R2_foldfinal_seed1_flip.csv,f37b4aed6879,715e038db456,final,nan,0.91100
