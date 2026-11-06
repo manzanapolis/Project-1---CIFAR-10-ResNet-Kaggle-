@@ -10,7 +10,7 @@ FOLDS = [0, 1, 2, 3, 4]
 EXPERIMENT_FOLDS = {"final_screen": ["final", 0], "kfold_T1B": [1, 2, 3, 4], "long_screen": ["final", 0],
                     "kfold_T1B_L4": [1, 2, 3, 4], "long_screen_L4": ["final", 0],
                     "long_screen_s1": ["final"],
-                    "teacher": ["final", 0]}   # per-experiment override; "final" = all 50k (L2)
+                    "teacher": ["final", 0], "kd_final": ["final"], "kd_fold0": [0]}   # per-experiment override; "final" = all 50k (L2)
 SEEDS = [0]
 EXPERIMENT_SEEDS = {"kfold_T1B_L4": [1], "long_screen_L4": [1], "long_screen_s1": [1]}   # per-experiment override
 
@@ -122,4 +122,16 @@ EXPERIMENTS = {
                      "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
                      "train": {"epochs": 200, "ema": 0.999}},
     },
+
+    # Ensemble distillation (R3): M3F student, long recipe, plus a KL term to the averaged soft predictions of our two
+    # best models (M3E + M3F, same recipe). alpha 0.7, T 4 (teammate's settings). kd_fold0 uses the fold-0 teachers so
+    # the gain can be checked on held-out data; kd_final uses the all-50k teachers (sub07 and sub09).
+    "kd_final": {"M3F_KD_ens": {"model": SHAPES["M3F_deep_two_stage"],
+                                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+                                "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1,
+                                          "kd": {"teachers": ["db5220449ec5", "1a453b9d969a"], "alpha": 0.7, "T": 4.0}}}},
+    "kd_fold0": {"M3F_KD_ens": {"model": SHAPES["M3F_deep_two_stage"],
+                                "data": {"photometric": "trivialaugment", "occlusion": "cutmix", "aug_repeats": 2},
+                                "train": {"epochs": 600, "ema": 0.999, "sam": 0.05, "label_smoothing": 0.1,
+                                          "kd": {"teachers": ["558aaaa4e6d7", "3c9415e41118"], "alpha": 0.7, "T": 4.0}}}},
 }

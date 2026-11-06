@@ -20,6 +20,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from . import inference as I
 from . import load as L
@@ -96,6 +97,19 @@ def run(cfg, out):
     bf16 = tc["bf16"] and device.type == "cuda"
     ema = EMA(model, tc["ema"]) if tc.get("ema") else None        # R2; absent from older configs (hash unchanged)
     rho = tc.get("sam", 0.0)                                      # R2: SAM neighbourhood radius
+    kd = tc.get("kd")                                             # R3: {"teachers": [run hashes], "alpha", "T"}
+    teachers = []
+    for h in (kd or {}).get("teachers", []):                      # frozen, already-trained runs (EMA weights)
+        t_net = build(json.loads((RUNS_DIR / h / "config.json").read_text())["model"]).to(device)
+        t_net.load_state_dict(torch.load(RUNS_DIR / h / "model.pt", map_location=device))
+        teachers.append(t_net.to(memory_format=torch.channels_last).eval().requires_grad_(False))
+
+    def loss_fn(logits, x, ya, yb, lam, p_t):
+        ce = T.mixed_cross_entropy(logits.float(), ya, yb, lam, tc["label_smoothing"])
+        if p_t is None:
+            return ce
+        kl = F.kl_div(F.log_softmax(logits.float() / kd["T"], 1), p_t, reduction="batchmean") * kd["T"] ** 2
+        return (1 - kd["alpha"]) * ce + kd["alpha"] * kl
 
     start, t_used = 0, 0.0
     if (out / "ckpt.pt").exists():                                # resume after preemption / time limit
@@ -120,8 +134,12 @@ def run(cfg, out):
         for x, ya, yb, lam in stream.epoch(epoch):
             x = x.contiguous(memory_format=torch.channels_last)
             with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=bf16):
+                p_t = None
+                if teachers:                                      # averaged soft targets on the same augmented batch
+                    with torch.no_grad():
+                        p_t = torch.stack([F.softmax(t_net(x).float() / kd["T"], 1) for t_net in teachers]).mean(0)
                 logits = model(x)
-                loss = T.mixed_cross_entropy(logits.float(), ya, yb, lam, tc["label_smoothing"])
+                loss = loss_fn(logits, x, ya, yb, lam, p_t)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             if rho:                                               # SAM: step to the worst nearby point, re-take the gradient there
@@ -132,7 +150,7 @@ def run(cfg, out):
                     torch._foreach_add_(params, eps)
                 opt.zero_grad(set_to_none=True)
                 with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=bf16):
-                    loss2 = T.mixed_cross_entropy(model(x).float(), ya, yb, lam, tc["label_smoothing"])
+                    loss2 = loss_fn(model(x), x, ya, yb, lam, p_t)
                 loss2.backward()
                 with torch.no_grad():
                     torch._foreach_sub_(params, eps)
