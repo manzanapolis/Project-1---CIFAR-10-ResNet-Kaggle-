@@ -17,3 +17,6 @@ weights/
 # grids of Kaggle test images (sorting aid only; keep out of the repo)
 exploration/diagnostics/contested_*
 teammate/
+
+# per-epoch training logs shared for the report (results/logs), unlike Slurm logs/
+!results/logs/
