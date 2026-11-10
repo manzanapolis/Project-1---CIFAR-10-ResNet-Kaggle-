@@ -1,8 +1,8 @@
-"""Report figures for the data section: representative training images per class, CutMix examples, class means.
+"""Report figures for the data section: representative training images per class, CutMix examples, class means, TrivialAugment examples.
 
 Uses the training cache and the project's own cutmix() (src/transform.py), so the CutMix panel shows exactly
 what training produced.
-  python report/figures/make_data_figures.py      -> report/figures/fig_samples, fig_cutmix, fig_class_means (.pdf, .png)
+  python report/figures/make_data_figures.py      -> report/figures/fig_samples, fig_cutmix, fig_class_means, fig_trivialaugment (.pdf, .png)
 """
 import sys
 from pathlib import Path
@@ -92,4 +92,35 @@ for c, ax in enumerate(axes):
         s.set_visible(False)
     ax.set_title(CLASSES[c], fontsize=7, pad=2)
 save(fig, "fig_class_means")
+plt.close(fig)
+
+# --- Figure 4: TrivialAugment examples (torchvision TrivialAugmentWide logic, with the chosen op recorded) ---
+from torchvision.transforms import TrivialAugmentWide  # noqa: E402
+from torchvision.transforms.autoaugment import _apply_op  # noqa: E402
+
+ta, tg = TrivialAugmentWide(), torch.Generator().manual_seed(7)
+space = ta._augmentation_space(ta.num_magnitude_bins)
+ops = [o for o in space if o != "Identity"]
+ROWS, COLS = 4, 7
+rng = np.random.default_rng(7)
+fig, axes = plt.subplots(ROWS, COLS + 1, figsize=(6.5, 3.75), gridspec_kw={"wspace": 0.06, "hspace": 0.35})
+for r, cls in enumerate(rng.choice(len(CLASSES), ROWS, replace=False)):
+    img = torch.from_numpy(x[rng.choice(np.flatnonzero(y == cls))]).permute(2, 0, 1)          # uint8 CHW
+    chosen = [ops[i] for i in torch.randperm(len(ops), generator=tg)[:COLS]]                 # distinct ops per row
+    panels = [(img, "original")]
+    for op in chosen:
+        mags, signed = space[op]
+        m = float(mags[torch.randint(len(mags), (1,), generator=tg)]) if mags.ndim > 0 else 0.0
+        if signed and torch.randint(2, (1,), generator=tg):
+            m = -m
+        panels.append((_apply_op(img, op, m, interpolation=ta.interpolation, fill=None), op))
+    for c, (im, title) in enumerate(panels):
+        ax = axes[r, c]
+        ax.imshow(im.permute(1, 2, 0).numpy(), interpolation="nearest")
+        ax.set_xticks([]); ax.set_yticks([])
+        for s in ax.spines.values():
+            s.set_visible(c == 0)
+            s.set_linewidth(1.2)
+        ax.set_title(title, fontsize=7, pad=2)
+save(fig, "fig_trivialaugment")
 plt.close(fig)
