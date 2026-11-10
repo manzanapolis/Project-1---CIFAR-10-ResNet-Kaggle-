@@ -124,3 +124,18 @@ for r, cls in enumerate(rng.choice(len(CLASSES), ROWS, replace=False)):
         ax.set_title(title, fontsize=7, pad=2)
 save(fig, "fig_trivialaugment")
 plt.close(fig)
+
+# --- Figure 5: every copy of the largest duplicate group (one white Audi, x54) ---
+groups = np.load(ROOT / "data" / "dup_groups.npy")
+ids, counts = np.unique(groups, return_counts=True)
+audi = np.flatnonzero(groups == ids[counts.argmax()])
+COLS = 18
+fig, axes = plt.subplots(int(np.ceil(len(audi) / COLS)), COLS, figsize=(6.5, 1.15 * np.ceil(len(audi) / COLS) * 6.5 / COLS / 1.0 * 2.7 / 2.7),
+                         gridspec_kw={"wspace": 0.05, "hspace": 0.05})
+for ax in axes.flat:
+    ax.axis("off")
+for ax, i in zip(axes.flat, audi):
+    ax.imshow(x[i], interpolation="nearest")
+save(fig, "fig_dup_audi")
+plt.close(fig)
+print(f"Audi group: {len(audi)} images, labels {np.bincount(y[audi], minlength=10).tolist()}")
