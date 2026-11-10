@@ -139,3 +139,22 @@ for ax, i in zip(axes.flat, audi):
 save(fig, "fig_dup_audi")
 plt.close(fig)
 print(f"Audi group: {len(audi)} images, labels {np.bincount(y[audi], minlength=10).tolist()}")
+
+# --- Figure 6: duplicate groups that are internet memes / reposts (picked by eye from the group sheet) ---
+MEMES = [(35031, "meme (Impact-font caption)"), (5507, "inspirational picture"), (19716, "stamp")]
+rows = [(np.flatnonzero(groups == gid), label) for gid, label in MEMES]
+COLS = max(len(m) for m, _ in rows)
+fig, axes = plt.subplots(len(rows), COLS, figsize=(6.5 * COLS / 11, 0.72 * len(rows) * 6.5 / 11 * 1.25),
+                         gridspec_kw={"wspace": 0.05, "hspace": 0.12}, squeeze=False)
+for r, (members, label) in enumerate(rows):
+    for c in range(COLS):
+        ax = axes[r, c]
+        ax.set_xticks([]); ax.set_yticks([])
+        for s in ax.spines.values():
+            s.set_visible(False)
+        if c < len(members):
+            ax.imshow(x[members[c]], interpolation="nearest")
+    axes[r, 0].set_ylabel(f"{label}\n{CLASSES[y[members[0]]]}, x{len(members)}", rotation=0, ha="right",
+                          va="center", labelpad=6, fontsize=7)
+save(fig, "fig_dup_memes")
+plt.close(fig)
