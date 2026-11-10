@@ -1,8 +1,8 @@
-"""Report figures for the data section: representative training images per class, and CutMix examples.
+"""Report figures for the data section: representative training images per class, CutMix examples, class means.
 
 Uses the training cache and the project's own cutmix() (src/transform.py), so the CutMix panel shows exactly
 what training produced.
-  python report/figures/make_data_figures.py      -> report/figures/fig_samples.{pdf,png}, fig_cutmix.{pdf,png}
+  python report/figures/make_data_figures.py      -> report/figures/fig_samples, fig_cutmix, fig_class_means (.pdf, .png)
 """
 import sys
 from pathlib import Path
@@ -81,4 +81,15 @@ while done < N_EX:
 for row, label in enumerate(["image A", "image B", "CutMix"]):
     axes[row, 0].set_ylabel(label, rotation=0, ha="right", va="center", labelpad=6)
 save(fig, "fig_cutmix")
+plt.close(fig)
+
+# --- Figure 3: mean training image per class (what is consistent across a class: background, position) ---
+fig, axes = plt.subplots(1, len(CLASSES), figsize=(6.5, 0.95), gridspec_kw={"wspace": 0.06})
+for c, ax in enumerate(axes):
+    ax.imshow(x[y == c].mean(0).astype(np.uint8), interpolation="nearest")
+    ax.set_xticks([]); ax.set_yticks([])
+    for s in ax.spines.values():
+        s.set_visible(False)
+    ax.set_title(CLASSES[c], fontsize=7, pad=2)
+save(fig, "fig_class_means")
 plt.close(fig)
