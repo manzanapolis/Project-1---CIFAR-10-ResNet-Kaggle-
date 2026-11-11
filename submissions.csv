@@ -9,3 +9,4 @@ date,file,file_sha1,run_hash,fold,oof_acc,public_score
 2026-11-06,sub09_long_screen_M3F_R2_foldfinal_seed0_flip.csv,7dad0cdb894c,1a453b9d969a,final,nan,0.90500
 2026-11-06,sub10_long_screen_s1_M3E_R2_foldfinal_seed1_flip.csv,675b90b2be14,6e63a995e2d6,final,nan,0.91300
 2026-11-06,sub11_long_screen_s1_M3F_R2_foldfinal_seed1_flip.csv,f37b4aed6879,715e038db456,final,nan,0.91100
+2026-11-06,sub12_kd_M3E_wrn28-10_sam600_foldfinal_seed0_flip.csv,f3d818d76b10,kd_pipeline/full_kd2_m3e_sam600,final,nan,0.91200
