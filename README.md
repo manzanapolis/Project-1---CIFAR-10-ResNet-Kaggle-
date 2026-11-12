@@ -1,5 +1,57 @@
 # CIFAR-10 ResNet under 5M parameters (ECE7123 Project 1)
 
+A residual network with **4,930,530 parameters** (limit: 5M), trained from scratch on CIFAR-10 for a Kaggle competition whose
+2,000-image test set comes from a *different distribution* than the training data: its images are brighter, higher in contrast
+and three times as likely to be grayscale. Our final model scores **91.3% on the public and 88.9% on the private leaderboard**
+(our first baseline scored 87.2% public). By Zuzanna Bak and Moses Bakst, New York University, Tandon School of Engineering.
+
+<p align="center"><img src="report/figures/final_architecture_schematic.png" alt="Final network (M3E): 3 residual layers of 4 basic blocks, widths 88/128/216" width="100%"></p>
+
+**The final model (M3E).** A 3×3 stem, then three residual layers of four basic blocks each (widths 88, 128, 216; stride 2 at the start of
+layers 2 and 3), global average pooling and a linear layer. Blocks are `ReLU(S(x) + F(x))` with `F` = conv-BN-ReLU-conv-BN.
+It was trained for 600 epochs on all 50,000 images with TrivialAugment, CutMix, repeated augmentation, sharpness-aware minimization
+(SAM, rho 0.05), label smoothing 0.1 and weight averaging (EMA 0.999), and predicts with flip test-time augmentation.
+No pretrained weights, no extra data, and test images are used only for the final prediction.
+
+| Model | Params | Public | Private |
+|---|---|---|---|
+| Baseline (3,3,3) ResNet, basic augmentation, 200 epochs | 4.33M | 87.2 | 84.2 |
+| + TrivialAugment, CutMix, EMA, SAM, 400 epochs | 4.33M | 89.4 | 87.3 |
+| **M3E, 600 epochs, seed 1 (final)** | **4.93M** | **91.3** | **88.9** |
+| M3E distilled from a WRN-28-10 teacher (`kd_pipeline/`) | 4.93M | 91.2 | 87.7 |
+
+**What we found.** Most of the gain came from the training recipe (strong augmentation, SAM, longer training), not from the network shape.
+Knowledge distillation, stochastic depth, squeeze-and-excitation, test-time batch-norm adaptation and class rebalancing gave no measurable
+improvement. Above about 97.5% held-out accuracy, validation no longer predicted the leaderboard order, and seed-to-seed noise
+(0.3 points public, 0.7 private) was as large as most of the differences between our late submissions.
+
+### The data
+
+<p align="center"><img src="report/figures/fig_class_samples.png" alt="Ten random training images per class" width="70%"></p>
+
+Ten random training images per class (32×32 RGB). The training set also contains near-duplicate images (one car appears 54 times)
+and many late-2000s internet memes, so cross-validation folds keep duplicate groups together
+(`exploration/dedup_transforms.py`).
+
+### Training and results
+
+<p align="center"><img src="report/figures/final_model_curves.png" alt="Training curves of the final recipe" width="100%"></p>
+
+Training curves of the final recipe: training loss of the runs on all 50,000 images (the submitted model is the thick line), and
+accuracy on augmented training images and held-out data for the fold-0 twin.
+
+<p align="center"><img src="report/figures/public_vs_private.png" alt="Public vs private leaderboard accuracy of our submissions" width="60%"></p>
+
+Public against private leaderboard accuracy of our submissions. Private scores were 2-4 points lower, and the public ranking only
+partly carried over.
+
+<p align="center"><img src="report/figures/training_curves.png" alt="Held-out error across the recipe ladder (pipeline A)" width="100%"></p>
+
+Held-out error across the recipe ladder (pipeline A, 45k/5k split). `kd_pipeline/` holds the second pipeline (distillation) with its
+own `train.py`, recipe and checkpoint.
+
+---
+
 Design decisions, with evidence and sources, are in `decisions.md`; the test-set provenance notes are in `data_provenance.md`.
 
 ## Layout
