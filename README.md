@@ -22,6 +22,7 @@ Design decisions, with evidence and sources, are in `decisions.md`; the test-set
 | `experiment.py` | — | every experiment (arms × folds) ever run |
 | `colab/run.ipynb` | — | run an experiment on a Colab GPU from a pinned commit |
 | `exploration/` | — | data analysis scripts and figures |
+| `kd_pipeline/` | — | distilled M3E student (public 0.912): self-contained `train.py`, checkpoint, recipe (see its README) |
 
 ## Where things live
 
