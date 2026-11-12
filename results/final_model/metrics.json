@@ -1,0 +1,19 @@
+{
+ "params": 4930530,
+ "epochs": 600,
+ "train_seconds": 25326,
+ "final_train_loss": 0.8828416893115411,
+ "final_train_acc": 0.8590745192307693,
+ "ema": 0.999,
+ "sam": 0.05,
+ "git_commit": "86a6f3b2f62e",
+ "git_dirty": false,
+ "gpu": "NVIDIA A100-SXM4-40GB",
+ "host": "b-19-49",
+ "heldout_acc_none": NaN,
+ "shift_acc_none": NaN,
+ "heldout_acc_flip": NaN,
+ "shift_acc_flip": NaN,
+ "heldout_acc_flip+shift": NaN,
+ "shift_acc_flip+shift": NaN
+}

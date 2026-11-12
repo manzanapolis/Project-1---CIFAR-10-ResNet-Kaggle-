@@ -1,0 +1,47 @@
+{
+ "model": {
+  "widths": [
+   88,
+   128,
+   216
+  ],
+  "blocks": [
+   4,
+   4,
+   4
+  ],
+  "block": "post",
+  "shortcut": "conv"
+ },
+ "train": {
+  "epochs": 600,
+  "batch": 128,
+  "lr": 0.1,
+  "momentum": 0.9,
+  "nesterov": false,
+  "weight_decay": 0.0005,
+  "label_smoothing": 0.1,
+  "bf16": true,
+  "workers": 6,
+  "monitor_every": 10,
+  "ema": 0.999,
+  "sam": 0.05
+ },
+ "data": {
+  "flip": true,
+  "aug_repeats": 2,
+  "photometric": "trivialaugment",
+  "jitter": 0.2,
+  "pca_lighting": 0.1,
+  "strong_aug_off_last": 0,
+  "crop_pad": 4,
+  "occlusion": "cutmix",
+  "cutout": 16,
+  "cutmix_p": 0.5,
+  "cutmix_alpha": 1.0,
+  "grayscale_p": 0.0,
+  "tta": "flip"
+ },
+ "fold": "final",
+ "seed": 1
+}

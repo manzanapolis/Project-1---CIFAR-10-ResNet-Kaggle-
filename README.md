@@ -54,6 +54,9 @@ own `train.py`, recipe and checkpoint.
 
 Design decisions, with evidence and sources, are in `decisions.md`; the test-set provenance notes are in `data_provenance.md`.
 
+**Final model:** `final_model.ipynb` loads the submitted weights (`results/final_model/`), prints the parameter
+count (4,930,530) and reproduces the Kaggle test predictions; test accuracy 88.9% (private leaderboard), 91.3% (public).
+
 ## Layout
 
 | Path | Stage | Contents |
